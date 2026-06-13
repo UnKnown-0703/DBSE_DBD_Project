@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-app: #0f172a;
+  --bg-sidebar: #1e293b;
+  --bg-card: #1e293b;
+  --border: rgba(255, 255, 255, 0.08);
+  --primary: #6366f1;
+  --text: #f8fafc;
+  --text-sec: #94a3b8;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-app); color: var(--text); font-family: 'Inter', sans-serif; }
+
+/* Layout Grid & Side Navigation spacing */
+.app-container { display: flex; min-height: 100vh; }
+.main-content { flex: 1; padding: 2rem; margin-left: 280px; }
+@media (max-width: 992px) { .main-content { margin-left: 80px; padding: 1rem; } }
+
+/* Shared Container Cards */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Fields & Forms elements */
+.form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.form-label { font-size: 0.8rem; font-weight: 600; color: var(--text-sec); }
+.input-field {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+}
+.input-field:focus { border-color: var(--primary); }
+
+/* Buttons & Triggers */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+}
+.btn:hover { opacity: 0.9; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.btn-danger { background: var(--error); color: #fff; }
+
+/* Status Labels & Badges */
+.badge { display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.badge-info { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+/* Dashboard Grids Layout */
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+
+/* Roster Tables */
+.table-container { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+.premium-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+.premium-table th { background: rgba(15, 22, 38, 0.4); color: var(--text-sec); padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-weight: 600; }
+.premium-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: rgba(30, 41, 59, 0.2); }
+
+/* Modals Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.80);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-content {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%; max-width: 400px;
+  padding: 1.5rem; position: relative;
+}
+
+/* Warnings & Success Banners */
+.alert { padding: 0.75rem 1rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+.alert-success { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+.alert-danger { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+.alert-warning { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+.alert-info { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
