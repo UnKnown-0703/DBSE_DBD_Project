@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { KeyRound, Mail, ShieldAlert, GraduationCap } from 'lucide-react';
+import { KeyRound, User, ShieldAlert, GraduationCap } from 'lucide-react';
 
 const Login = () => {
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -27,15 +27,15 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Please enter both email and password.');
+    if (!username || !password) {
+      setError('Please enter both username/email and password.');
       return;
     }
 
     setError('');
     setSubmitting(true);
 
-    const result = await login(email, password);
+    const result = await login(username, password);
 
     setSubmitting(false);
     if (!result.success) {
@@ -53,7 +53,7 @@ const Login = () => {
           <div style={styles.logoBadge}><GraduationCap size={24} /></div>
           <h1 style={styles.title}>College ERP Dashbord</h1>
         </div>
-
+ 
         <form onSubmit={handleSubmit} className="glass-card" style={styles.formCard}>
           <h2 style={styles.formTitle}>Sign In</h2>
           <p style={styles.formSubtitle}>Access your academic dashboard</p>
@@ -66,14 +66,14 @@ const Login = () => {
           )}
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Username or Email</label>
             <div style={styles.inputWrapper}>
-              <Mail size={18} style={styles.inputIcon} />
+              <User size={18} style={styles.inputIcon} />
               <input
-                type="email"
-                placeholder="name@college.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Roll No / Employee ID / Email"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="input-field"
                 style={styles.input}
                 required

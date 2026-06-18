@@ -6,6 +6,7 @@ const { router: authRouter } = require('./routes/auth');
 const adminRouter = require('./routes/admin');
 const facultyRouter = require('./routes/faculty');
 const studentRouter = require('./routes/student');
+const bulkRouter = require('./routes/bulk');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/faculty', facultyRouter);
 app.use('/api/student', studentRouter);
+app.use('/api/bulk', bulkRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

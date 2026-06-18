@@ -11,11 +11,17 @@ import {
   Clock, 
   CheckCircle, 
   Save,
-  Trash2
+  Trash2,
+  Upload,
+  FileSpreadsheet,
+  X,
+  AlertTriangle
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { downloadStudentTemplate } from '../../utils/excelTemplate';
 
 const FacultyDashboard = () => {
-  const { token, user, updateProfile } = useContext(AuthContext);
+  const { token, user, logout, updateProfile } = useContext(AuthContext);
   const navigate = useNavigate();
   
   // Tabs: 'teaching', 'advisory', 'profile'
@@ -35,8 +41,8 @@ const FacultyDashboard = () => {
   const [profileLoading, setProfileLoading] = useState(false);
   
   // Edit Profile States
-  const [phone, setPhone] = useState(user.phone || '');
-  const [qualification, setQualification] = useState(user.qualification || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [qualification, setQualification] = useState(user?.qualification || '');
   
   // Register Student Modal & Form States
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -50,6 +56,14 @@ const FacultyDashboard = () => {
   const [newStudentSemester, setNewStudentSemester] = useState('1');
   const [registeringStudent, setRegisteringStudent] = useState(false);
 
+  // Bulk upload states
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkFile, setBulkFile] = useState(null);
+  const [bulkUsers, setBulkUsers] = useState([]);
+  const [bulkError, setBulkError] = useState('');
+  const [bulkSuccess, setBulkSuccess] = useState('');
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+
   // Feedback Messages
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -62,13 +76,31 @@ const FacultyDashboard = () => {
         
         // Fetch courses taught
         const coursesRes = await fetch('http://127.0.0.1:5000/api/faculty/courses', { headers });
+        if (coursesRes.status === 401 || coursesRes.status === 403) {
+          logout();
+          navigate('/login');
+          return;
+        }
         const coursesData = await coursesRes.json();
-        setCourses(coursesData);
+        if (Array.isArray(coursesData)) {
+          setCourses(coursesData);
+        } else {
+          setCourses([]);
+        }
 
         // Fetch notices for faculty
         const announceRes = await fetch('http://127.0.0.1:5000/api/admin/announcements', { headers });
+        if (announceRes.status === 401 || announceRes.status === 403) {
+          logout();
+          navigate('/login');
+          return;
+        }
         const announceData = await announceRes.json();
-        setAnnouncements(announceData.filter(a => a.target_role === 'all' || a.target_role === 'faculty'));
+        if (Array.isArray(announceData)) {
+          setAnnouncements(announceData.filter(a => a.target_role === 'all' || a.target_role === 'faculty'));
+        } else {
+          setAnnouncements([]);
+        }
 
         setLoading(false);
       } catch (err) {
@@ -98,13 +130,31 @@ const FacultyDashboard = () => {
       
       // Fetch department student No Dues records
       const noduesRes = await fetch('http://127.0.0.1:5000/api/faculty/department/nodues', { headers });
+      if (noduesRes.status === 401 || noduesRes.status === 403) {
+        logout();
+        navigate('/login');
+        return;
+      }
       const noduesData = await noduesRes.json();
-      setNodues(noduesData);
+      if (Array.isArray(noduesData)) {
+        setNodues(noduesData);
+      } else {
+        setNodues([]);
+      }
 
       // Fetch department academic support tickets
       const ticketRes = await fetch('http://127.0.0.1:5000/api/faculty/department/tickets', { headers });
+      if (ticketRes.status === 401 || ticketRes.status === 403) {
+        logout();
+        navigate('/login');
+        return;
+      }
       const ticketData = await ticketRes.json();
-      setTickets(ticketData);
+      if (Array.isArray(ticketData)) {
+        setTickets(ticketData);
+      } else {
+        setTickets([]);
+      }
 
       setAdvisoryLoading(false);
     } catch (err) {
@@ -118,8 +168,17 @@ const FacultyDashboard = () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       const peersRes = await fetch('http://127.0.0.1:5000/api/faculty/department/peers', { headers });
+      if (peersRes.status === 401 || peersRes.status === 403) {
+        logout();
+        navigate('/login');
+        return;
+      }
       const peersData = await peersRes.json();
-      setPeers(peersData);
+      if (Array.isArray(peersData)) {
+        setPeers(peersData);
+      } else {
+        setPeers([]);
+      }
       setProfileLoading(false);
     } catch (err) {
       console.error('Error fetching peers data:', err);
@@ -304,6 +363,95 @@ const FacultyDashboard = () => {
       setError(err.message || 'Error registering student.');
     } finally {
       setRegisteringStudent(false);
+    }
+  };
+
+  const handleBulkFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setBulkFile(file);
+    setBulkError('');
+    setBulkSuccess('');
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+        
+        if (data.length === 0) {
+          throw new Error('The uploaded file is empty.');
+        }
+
+        // Quick verification of columns
+        const firstRow = data[0];
+        const requiredFields = ['name', 'email', 'roll_number'];
+
+        for (const field of requiredFields) {
+          if (!(field in firstRow) && !(field.toUpperCase() in firstRow)) {
+            throw new Error(`Missing required column: "${field}"`);
+          }
+        }
+
+        // Standardize keys (lowercase)
+        const standardized = data.map(item => {
+          const newItem = {};
+          Object.keys(item).forEach(key => {
+            newItem[key.toLowerCase()] = item[key];
+          });
+          newItem.role = 'student';
+          return newItem;
+        });
+
+        setBulkUsers(standardized);
+      } catch (err) {
+        setBulkError(err.message || 'Failed to parse Excel file. Check format.');
+        setBulkUsers([]);
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    if (bulkUsers.length === 0) {
+      setBulkError('No valid student records to import.');
+      return;
+    }
+
+    setBulkSubmitting(true);
+    setBulkError('');
+    setBulkSuccess('');
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/bulk/bulk-register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ users: bulkUsers })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      setBulkSuccess(data.message || 'Students imported successfully!');
+      setBulkUsers([]);
+      setBulkFile(null);
+      fetchAdvisoryData();
+
+      setTimeout(() => {
+        setShowBulkModal(false);
+      }, 1500);
+    } catch (err) {
+      setBulkError(err.message || 'Error executing bulk registration.');
+    } finally {
+      setBulkSubmitting(false);
     }
   };
 
@@ -505,13 +653,22 @@ const FacultyDashboard = () => {
             <div className="glass-card" style={styles.moduleCard}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <h3 style={styles.sectionTitle}>Department Digital Clearance</h3>
-                <button 
-                  onClick={() => setShowRegisterModal(true)}
-                  className="btn btn-primary" 
-                  style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem' }}
-                >
-                  + Register Student
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    onClick={() => setShowBulkModal(true)}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem' }}
+                  >
+                    Bulk Import
+                  </button>
+                  <button 
+                    onClick={() => setShowRegisterModal(true)}
+                    className="btn btn-primary" 
+                    style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem' }}
+                  >
+                    + Register Student
+                  </button>
+                </div>
               </div>
               <p style={styles.sectionDesc}>View and toggle student No Dues statuses. Click a pill to change status, or use the trash icon to delete student.</p>
               
@@ -801,6 +958,107 @@ const FacultyDashboard = () => {
                   disabled={registeringStudent}
                 >
                   {registeringStudent ? 'Registering...' : 'Register Student'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal - Bulk Student Import */}
+      {showBulkModal && (
+        <div style={styles.modalOverlay}>
+          <div className="glass-card" style={{ ...styles.modalContent, maxWidth: '650px' }}>
+            <button onClick={() => { setShowBulkModal(false); setBulkUsers([]); setBulkFile(null); }} style={styles.closeBtn}>
+              <X size={20} />
+            </button>
+            <h3 style={styles.sectionTitle}>Bulk Student Import (Excel)</h3>
+            <p style={styles.sectionDesc}>Download the template, fill it out, and upload to register multiple students directly in your department.</p>
+
+            <div style={styles.templateDownloads}>
+              <button onClick={downloadStudentTemplate} className="btn btn-secondary" style={styles.templateBtn}>
+                <FileSpreadsheet size={16} />
+                <span>Student Template</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleBulkSubmit} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {bulkError && (
+                <div className="alert alert-danger" style={{ fontSize: '0.8rem', padding: '0.75rem' }}>
+                  <AlertTriangle size={16} />
+                  <span>{bulkError}</span>
+                </div>
+              )}
+              {bulkSuccess && <div className="alert alert-success" style={{ fontSize: '0.8rem', padding: '0.75rem' }}>{bulkSuccess}</div>}
+
+              <div className="form-group">
+                <label className="form-label">Choose Excel File</label>
+                <div style={styles.fileInputWrapper}>
+                  <Upload size={18} style={styles.fileIcon} />
+                  <input
+                    type="file"
+                    accept=".xlsx, .xls"
+                    onChange={handleBulkFileChange}
+                    style={styles.fileInput}
+                    required={!bulkFile}
+                  />
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    {bulkFile ? bulkFile.name : 'Select .xlsx or .xls file'}
+                  </span>
+                </div>
+              </div>
+
+              {bulkUsers.length > 0 && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.5rem', color: '#fff' }}>
+                    Previewing {bulkUsers.length} Students
+                  </h4>
+                  <div style={styles.previewContainer}>
+                    <table style={styles.previewTable}>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Roll Number</th>
+                          <th>Sem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bulkUsers.slice(0, 5).map((u, index) => (
+                          <tr key={index}>
+                            <td>{u.name}</td>
+                            <td>{u.email}</td>
+                            <td>{u.roll_number}</td>
+                            <td>{u.semester || 1}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {bulkUsers.length > 5 && (
+                      <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', paddingTop: '0.5rem' }}>
+                        ... and {bulkUsers.length - 5} more students
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div style={styles.modalActions}>
+                <button
+                  type="button"
+                  onClick={() => { setShowBulkModal(false); setBulkUsers([]); setBulkFile(null); }}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                  disabled={bulkSubmitting || bulkUsers.length === 0}
+                >
+                  {bulkSubmitting ? 'Importing...' : `Import ${bulkUsers.length} Students`}
                 </button>
               </div>
             </form>
@@ -1180,6 +1438,67 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: '1rem',
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: '1.25rem',
+    right: '1.25rem',
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-muted)',
+    cursor: 'pointer',
+  },
+  templateDownloads: {
+    display: 'flex',
+    gap: '0.75rem',
+    marginBottom: '1rem',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    paddingBottom: '1rem',
+  },
+  templateBtn: {
+    padding: '0.5rem 0.85rem',
+    fontSize: '0.75rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+  },
+  fileInputWrapper: {
+    border: '1px dashed var(--border)',
+    borderRadius: 'var(--radius)',
+    padding: '0.75rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    background: 'rgba(255, 255, 255, 0.01)',
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  fileIcon: {
+    color: 'var(--primary)',
+  },
+  fileInput: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0,
+    cursor: 'pointer',
+  },
+  previewContainer: {
+    maxHeight: '180px',
+    overflowY: 'auto',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '0.5rem',
+    background: 'rgba(0, 0, 0, 0.2)',
+  },
+  previewTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '0.75rem',
+    textAlign: 'left',
   }
 };
 

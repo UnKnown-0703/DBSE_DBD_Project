@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { Search, UserPlus, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Search, UserPlus, Trash2, X, AlertTriangle, Upload, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { downloadStudentTemplate, downloadFacultyTemplate } from '../../utils/excelTemplate';
 
 const ManageUsers = () => {
   const { token } = useContext(AuthContext);
@@ -12,8 +14,17 @@ const ManageUsers = () => {
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Bulk upload states
+  const [bulkFile, setBulkFile] = useState(null);
+  const [bulkUsers, setBulkUsers] = useState([]);
+  const [bulkRole, setBulkRole] = useState('student');
+  const [bulkError, setBulkError] = useState('');
+  const [bulkSuccess, setBulkSuccess] = useState('');
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
 
   // Form states
   const [name, setName] = useState('');
@@ -78,6 +89,97 @@ const ManageUsers = () => {
     setEmployeeId('');
     setQualification('');
     setShowModal(true);
+  };
+
+  const handleBulkFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setBulkFile(file);
+    setBulkError('');
+    setBulkSuccess('');
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+        
+        if (data.length === 0) {
+          throw new Error('The uploaded file is empty.');
+        }
+
+        // Quick verification of columns
+        const firstRow = data[0];
+        const requiredFields = ['name', 'email'];
+        if (bulkRole === 'student') requiredFields.push('roll_number');
+        else requiredFields.push('employee_id');
+
+        for (const field of requiredFields) {
+          if (!(field in firstRow) && !(field.toUpperCase() in firstRow)) {
+            throw new Error(`Missing required column: "${field}"`);
+          }
+        }
+
+        // Standardize keys (lowercase)
+        const standardized = data.map(item => {
+          const newItem = {};
+          Object.keys(item).forEach(key => {
+            newItem[key.toLowerCase()] = item[key];
+          });
+          newItem.role = bulkRole;
+          return newItem;
+        });
+
+        setBulkUsers(standardized);
+      } catch (err) {
+        setBulkError(err.message || 'Failed to parse Excel file. Check format.');
+        setBulkUsers([]);
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    if (bulkUsers.length === 0) {
+      setBulkError('No valid user records to import.');
+      return;
+    }
+
+    setBulkSubmitting(true);
+    setBulkError('');
+    setBulkSuccess('');
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/bulk/bulk-register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ users: bulkUsers })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      setBulkSuccess(data.message || 'Users imported successfully!');
+      setBulkUsers([]);
+      setBulkFile(null);
+      fetchUsers();
+
+      setTimeout(() => {
+        setShowBulkModal(false);
+      }, 1500);
+    } catch (err) {
+      setBulkError(err.message || 'Error executing bulk registration.');
+    } finally {
+      setBulkSubmitting(false);
+    }
   };
 
   const handleCreateUser = async (e) => {
@@ -173,10 +275,16 @@ const ManageUsers = () => {
           <h1 style={styles.pageTitle} className="title-gradient">User Accounts</h1>
           <p style={styles.pageSubtitle}>Manage and audit campus faculty & students</p>
         </div>
-        <button onClick={handleOpenModal} className="btn btn-primary">
-          <UserPlus size={18} />
-          <span>Register {activeTab === 'student' ? 'Student' : 'Faculty'}</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button onClick={() => setShowBulkModal(true)} className="btn btn-secondary">
+            <Upload size={18} />
+            <span>Bulk Import</span>
+          </button>
+          <button onClick={handleOpenModal} className="btn btn-primary">
+            <UserPlus size={18} />
+            <span>Register {activeTab === 'student' ? 'Student' : 'Faculty'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -465,6 +573,128 @@ const ManageUsers = () => {
           </div>
         </div>
       )}
+
+      {/* Modal - Bulk User Import */}
+      {showBulkModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ ...styles.modal, maxWidth: '650px' }}>
+            <button onClick={() => { setShowBulkModal(false); setBulkUsers([]); setBulkFile(null); }} style={styles.closeBtn}>
+              <X size={20} />
+            </button>
+            <h2 style={styles.modalTitle}>Bulk User Import (Excel)</h2>
+            <p style={styles.modalDesc}>Download a template, fill in details, and upload the file to register users in bulk.</p>
+
+            <div style={styles.templateDownloads}>
+              <button onClick={downloadStudentTemplate} className="btn btn-secondary" style={styles.templateBtn}>
+                <FileSpreadsheet size={16} />
+                <span>Student Template</span>
+              </button>
+              <button onClick={downloadFacultyTemplate} className="btn btn-secondary" style={styles.templateBtn}>
+                <FileSpreadsheet size={16} />
+                <span>Faculty Template</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleBulkSubmit} style={{ marginTop: '1.5rem' }}>
+              {bulkError && (
+                <div className="alert alert-danger" style={{ fontSize: '0.8rem', padding: '0.75rem', marginBottom: '1rem' }}>
+                  <AlertTriangle size={16} />
+                  <span>{bulkError}</span>
+                </div>
+              )}
+              {bulkSuccess && <div className="alert alert-success" style={{ fontSize: '0.8rem', padding: '0.75rem', marginBottom: '1rem' }}>{bulkSuccess}</div>}
+
+              <div style={styles.formGrid}>
+                <div className="form-group">
+                  <label className="form-label">Import User Type</label>
+                  <select
+                    value={bulkRole}
+                    onChange={(e) => { setBulkRole(e.target.value); setBulkUsers([]); setBulkFile(null); }}
+                    className="input-field"
+                    style={{ background: '#131b2e' }}
+                  >
+                    <option value="student">Students</option>
+                    <option value="faculty">Faculty Members</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Choose Excel File</label>
+                  <div style={styles.fileInputWrapper}>
+                    <Upload size={18} style={styles.fileIcon} />
+                    <input
+                      type="file"
+                      accept=".xlsx, .xls"
+                      onChange={handleBulkFileChange}
+                      style={styles.fileInput}
+                      required={!bulkFile}
+                    />
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      {bulkFile ? bulkFile.name : 'Select .xlsx or .xls file'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {bulkUsers.length > 0 && (
+                <div style={{ marginTop: '1.25rem' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.5rem', color: '#fff' }}>
+                    Previewing {bulkUsers.length} Records
+                  </h4>
+                  <div style={styles.previewContainer}>
+                    <table style={styles.previewTable}>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>{bulkRole === 'student' ? 'Roll Number' : 'Employee ID'}</th>
+                          {bulkRole === 'student' && <th>Sem</th>}
+                          <th>Dept Code</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bulkUsers.slice(0, 5).map((u, index) => (
+                          <tr key={index}>
+                            <td>{u.name}</td>
+                            <td>{u.email}</td>
+                            <td>{bulkRole === 'student' ? u.roll_number : u.employee_id}</td>
+                            {bulkRole === 'student' && <td>{u.semester || 1}</td>}
+                            <td>{u.department_code || 'N/A'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {bulkUsers.length > 5 && (
+                      <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', paddingTop: '0.5rem' }}>
+                        ... and {bulkUsers.length - 5} more rows
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div style={styles.modalActions}>
+                <button
+                  type="button"
+                  onClick={() => { setShowBulkModal(false); setBulkUsers([]); setBulkFile(null); }}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                  disabled={bulkSubmitting || bulkUsers.length === 0}
+                >
+                  {bulkSubmitting ? 'Importing...' : `Import ${bulkUsers.length} Accounts`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -574,6 +804,58 @@ const styles = {
     marginTop: '2rem',
     borderTop: '1px solid rgba(255, 255, 255, 0.05)',
     paddingTop: '1rem',
+  },
+  templateDownloads: {
+    display: 'flex',
+    gap: '0.75rem',
+    marginBottom: '1rem',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    paddingBottom: '1rem',
+  },
+  templateBtn: {
+    padding: '0.5rem 0.85rem',
+    fontSize: '0.75rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+  },
+  fileInputWrapper: {
+    border: '1px dashed var(--border)',
+    borderRadius: 'var(--radius)',
+    padding: '0.75rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    background: 'rgba(255, 255, 255, 0.01)',
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  fileIcon: {
+    color: 'var(--primary)',
+  },
+  fileInput: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0,
+    cursor: 'pointer',
+  },
+  previewContainer: {
+    maxHeight: '180px',
+    overflowY: 'auto',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '0.5rem',
+    background: 'rgba(0, 0, 0, 0.2)',
+  },
+  previewTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '0.75rem',
+    textAlign: 'left',
   }
 };
 

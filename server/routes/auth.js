@@ -114,17 +114,24 @@ router.post('/register', async (req, res) => {
 
 // Login Route
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
+    const identifier = username || email;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Please provide email and password.' });
+    if (!identifier || !password) {
+        return res.status(400).json({ error: 'Please provide username/email and password.' });
     }
 
     try {
-        // Find user
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        // Find user by email, student roll number, or faculty employee id
+        const [users] = await db.query(
+            `SELECT u.* FROM users u
+             LEFT JOIN students s ON u.id = s.user_id
+             LEFT JOIN faculty f ON u.id = f.user_id
+             WHERE u.email = ? OR s.roll_number = ? OR f.employee_id = ?`,
+            [identifier, identifier, identifier]
+        );
         if (users.length === 0) {
-            return res.status(401).json({ error: 'Invalid email or password.' });
+            return res.status(401).json({ error: 'Invalid username/email or password.' });
         }
 
         const user = users[0];
