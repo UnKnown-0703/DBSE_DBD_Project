@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { ArrowLeft, Check, Calendar, Award, CheckSquare, Save } from 'lucide-react';
+import { ArrowLeft, Check, Calendar, Award, CheckSquare, Save, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const ClassDetail = () => {
   const { offeringId } = useParams();
@@ -130,6 +131,36 @@ const ClassDetail = () => {
     }
   };
 
+  const handleExportExcel = () => {
+    if (!students || students.length === 0) {
+      alert("No students registered in this class roster to export.");
+      return;
+    }
+
+    // Format data for sheet
+    const formatted = students.map(s => {
+      const pct = s.total_count > 0 ? (s.present_count / s.total_count) * 100 : 100.0;
+      return {
+        'Roll Number': s.roll_number,
+        'Student Name': s.name,
+        'Email Address': s.email,
+        'Attendance Percentage': `${pct.toFixed(1)}%`,
+        'Present Count': s.present_count,
+        'Total Classes': s.total_count,
+        'Assigned Grade': s.grade || 'Not Graded',
+        'Status': s.enrollment_status
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formatted);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Roster');
+
+    // Generate buffer & trigger download
+    const filename = `${courseDetails?.course_code || 'Class'}_Roster.xlsx`.replace(/\s+/g, '_');
+    XLSX.writeFile(workbook, filename);
+  };
+
   if (loading) {
     return <div style={styles.loading}>Loading student records...</div>;
   }
@@ -142,7 +173,7 @@ const ClassDetail = () => {
         <span>Back to Classes</span>
       </button>
 
-      <div className="header-row" style={{ marginTop: '1rem' }}>
+      <div className="header-row" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={styles.pageTitle} className="title-gradient">
             {courseDetails?.course_name || 'Class Administration'}
@@ -151,6 +182,10 @@ const ClassDetail = () => {
             {courseDetails?.course_code} • {courseDetails?.schedule} • {courseDetails?.classroom}
           </p>
         </div>
+        <button onClick={handleExportExcel} className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <FileSpreadsheet size={16} />
+          <span>Export Roster to Excel</span>
+        </button>
       </div>
 
       {/* Tabs */}

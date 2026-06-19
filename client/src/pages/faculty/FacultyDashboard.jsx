@@ -64,6 +64,19 @@ const FacultyDashboard = () => {
   const [bulkSuccess, setBulkSuccess] = useState('');
   const [bulkSubmitting, setBulkSubmitting] = useState(false);
 
+  // Course Offering States
+  const [showOfferingModal, setShowOfferingModal] = useState(false);
+  const [catalog, setCatalog] = useState([]);
+  const [selectedCatalogId, setSelectedCatalogId] = useState('');
+  const [offeringSemester, setOfferingSemester] = useState('1');
+  const [offeringAcademicYear, setOfferingAcademicYear] = useState(`${new Date().getFullYear()}-${new Date().getFullYear()+1}`);
+  const [offeringSchedule, setOfferingSchedule] = useState('');
+  const [offeringClassroom, setOfferingClassroom] = useState('');
+  const [offeringExamDate, setOfferingExamDate] = useState('');
+  const [offeringSubmitting, setOfferingSubmitting] = useState(false);
+  const [offeringError, setOfferingError] = useState('');
+  const [offeringSuccess, setOfferingSuccess] = useState('');
+
   // Feedback Messages
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -455,6 +468,82 @@ const FacultyDashboard = () => {
     }
   };
 
+  const fetchCatalog = async () => {
+    try {
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const res = await fetch('http://127.0.0.1:5000/api/faculty/courses/catalog', { headers });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (Array.isArray(data)) {
+        setCatalog(data);
+        if (data.length > 0) {
+          setSelectedCatalogId(data[0].id.toString());
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching course catalog:', err);
+      setOfferingError('Failed to load course catalog.');
+    }
+  };
+
+  const handleCreateOffering = async (e) => {
+    e.preventDefault();
+    if (!selectedCatalogId) {
+      setOfferingError('Please select a course from the catalog.');
+      return;
+    }
+    setOfferingSubmitting(true);
+    setOfferingError('');
+    setOfferingSuccess('');
+
+    const payload = {
+      course_id: parseInt(selectedCatalogId),
+      semester: parseInt(offeringSemester),
+      academic_year: offeringAcademicYear,
+      schedule: offeringSchedule,
+      classroom: offeringClassroom,
+      exam_date: offeringExamDate || null
+    };
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/faculty/courses/offer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      setOfferingSuccess('Course offering created successfully!');
+      
+      // Refresh teaching courses list
+      const coursesRes = await fetch('http://127.0.0.1:5000/api/faculty/courses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const coursesData = await coursesRes.json();
+      if (Array.isArray(coursesData)) {
+        setCourses(coursesData);
+      }
+
+      // Reset offering form fields
+      setOfferingSchedule('');
+      setOfferingClassroom('');
+      setOfferingExamDate('');
+      
+      setTimeout(() => {
+        setShowOfferingModal(false);
+        setOfferingSuccess('');
+      }, 1500);
+    } catch (err) {
+      setOfferingError(err.message || 'Error creating course offering.');
+    } finally {
+      setOfferingSubmitting(false);
+    }
+  };
+
   if (loading) {
     return <div style={styles.loading}>Loading Faculty Dashboard...</div>;
   }
@@ -504,7 +593,19 @@ const FacultyDashboard = () => {
           {/* Left Column: Teaching Schedule Classes */}
           <div style={styles.column}>
             <div className="glass-card" style={styles.moduleCard}>
-              <h3 style={styles.sectionTitle}>Your Assigned Classes</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <h3 style={styles.sectionTitle}>Your Assigned Classes</h3>
+                <button 
+                  onClick={() => {
+                    setShowOfferingModal(true);
+                    fetchCatalog();
+                  }}
+                  className="btn btn-primary" 
+                  style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem' }}
+                >
+                  + Add Course Offering
+                </button>
+              </div>
               <p style={styles.sectionDesc}>Select a class offering below to manage student attendance logs and grading sheets.</p>
               
               <div style={styles.coursesList}>
@@ -1059,6 +1160,126 @@ const FacultyDashboard = () => {
                   disabled={bulkSubmitting || bulkUsers.length === 0}
                 >
                   {bulkSubmitting ? 'Importing...' : `Import ${bulkUsers.length} Students`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal - Course Offering */}
+      {showOfferingModal && (
+        <div style={styles.modalOverlay}>
+          <div className="glass-card" style={styles.modalContent}>
+            <button onClick={() => setShowOfferingModal(false)} style={styles.closeBtn}>
+              <X size={20} />
+            </button>
+            <h3 style={styles.sectionTitle}>Add Course Offering</h3>
+            <p style={styles.sectionDesc}>Create a new class offering for your department this semester.</p>
+
+            <form onSubmit={handleCreateOffering} style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {offeringError && <div className="alert alert-danger" style={{ fontSize: '0.8rem', padding: '0.75rem' }}>{offeringError}</div>}
+              {offeringSuccess && <div className="alert alert-success" style={{ fontSize: '0.8rem', padding: '0.75rem' }}>{offeringSuccess}</div>}
+
+              <div className="form-group">
+                <label className="form-label">Select Course</label>
+                <select
+                  value={selectedCatalogId}
+                  onChange={(e) => setSelectedCatalogId(e.target.value)}
+                  className="input-field"
+                  required
+                >
+                  {catalog.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.course_code} - {c.name} ({c.credits} Credits)
+                    </option>
+                  ))}
+                  {catalog.length === 0 && (
+                    <option value="">No courses available in department catalog</option>
+                  )}
+                </select>
+              </div>
+
+              <div style={styles.formGrid2}>
+                <div className="form-group">
+                  <label className="form-label">Semester</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="8"
+                    value={offeringSemester}
+                    onChange={(e) => setOfferingSemester(e.target.value)}
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Academic Year</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2025-2026"
+                    value={offeringAcademicYear}
+                    onChange={(e) => setOfferingAcademicYear(e.target.value)}
+                    className="input-field"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Weekly Schedule</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mon/Wed 10:00 AM - 11:30 AM"
+                  value={offeringSchedule}
+                  onChange={(e) => setOfferingSchedule(e.target.value)}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div style={styles.formGrid2}>
+                <div className="form-group">
+                  <label className="form-label">Classroom</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Room 101"
+                    value={offeringClassroom}
+                    onChange={(e) => setOfferingClassroom(e.target.value)}
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Exam Date</label>
+                  <input
+                    type="date"
+                    value={offeringExamDate}
+                    onChange={(e) => setOfferingExamDate(e.target.value)}
+                    className="input-field"
+                    style={{ background: '#131b2e' }}
+                  />
+                </div>
+              </div>
+
+              <div style={styles.modalActions}>
+                <button
+                  type="button"
+                  onClick={() => setShowOfferingModal(false)}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                  disabled={offeringSubmitting || catalog.length === 0}
+                >
+                  {offeringSubmitting ? 'Creating...' : 'Create Offering'}
                 </button>
               </div>
             </form>

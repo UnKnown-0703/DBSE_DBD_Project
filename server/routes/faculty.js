@@ -366,4 +366,51 @@ router.delete('/tickets/:ticketId', async (req, res) => {
     }
 });
 
+// 14. Get course catalog filtering by faculty department
+router.get('/courses/catalog', async (req, res) => {
+    try {
+        const [courses] = await db.query(
+            `SELECT c.id, c.course_code, c.name, c.credits, c.description
+             FROM courses c
+             WHERE c.department_id = (SELECT department_id FROM faculty WHERE user_id = ?)`,
+            [req.user.id]
+        );
+        res.json(courses);
+    } catch (err) {
+        console.error('Fetch course catalog error:', err);
+        res.status(500).json({ error: 'Error fetching course catalog.' });
+    }
+});
+
+// 15. Offer a course (create new course offering)
+router.post('/courses/offer', async (req, res) => {
+    const { course_id, semester, academic_year, schedule, classroom, exam_date } = req.body;
+    if (!course_id || !semester || !academic_year || !schedule || !classroom) {
+        return res.status(400).json({ error: 'Course ID, semester, academic year, schedule, and classroom are required.' });
+    }
+
+    try {
+        // Verify course belongs to faculty's department
+        const [course] = await db.query(
+            `SELECT id FROM courses 
+             WHERE id = ? AND department_id = (SELECT department_id FROM faculty WHERE user_id = ?)`,
+            [course_id, req.user.id]
+        );
+        if (course.length === 0) {
+            return res.status(403).json({ error: 'Access denied. You can only offer courses belonging to your department.' });
+        }
+
+        const [result] = await db.query(
+            `INSERT INTO course_offerings (course_id, faculty_id, semester, academic_year, schedule, classroom, exam_date)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [course_id, req.user.id, semester, academic_year, schedule, classroom, exam_date || null]
+        );
+        res.json({ message: 'Course offering created successfully.', offeringId: result.insertId });
+    } catch (err) {
+        console.error('Create course offering error:', err);
+        res.status(500).json({ error: 'Error creating course offering.' });
+    }
+});
+
 module.exports = router;
+
