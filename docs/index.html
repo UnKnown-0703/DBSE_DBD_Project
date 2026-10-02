@@ -21,7 +21,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* ==================== DESIGN SYSTEM & VARIABLES ==================== */
         :root {
             --header-height: 4.5rem;
             --first-color: #3b82f6;
@@ -48,7 +47,6 @@
             --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* ==================== GLOBAL STYLES ==================== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -73,7 +71,6 @@
             position: relative;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -88,7 +85,6 @@
             background: var(--first-color);
         }
 
-        /* ==================== FLOATING BUBBLES ANIMATION ==================== */
         .bubbles {
             position: fixed;
             top: 0;
@@ -124,23 +120,12 @@
         .bubbles li:nth-child(10) { left: 82%; width: 50px; height: 50px; animation-delay: 9s; animation-duration: 26s; }
 
         @keyframes floatUp {
-            0% {
-                transform: translateY(0) rotate(0deg) scale(0.8);
-                opacity: 0;
-            }
-            15% {
-                opacity: 0.7;
-            }
-            85% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-130vh) rotate(720deg) scale(1.1);
-                opacity: 0;
-            }
+            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+            15% { opacity: 0.7; }
+            85% { opacity: 0.7; }
+            100% { transform: translateY(-130vh) rotate(720deg) scale(1.1); opacity: 0; }
         }
 
-        /* ==================== NAVIGATION BAR ==================== */
         .app-header {
             position: fixed;
             top: 0;
@@ -255,7 +240,6 @@
             cursor: pointer;
         }
 
-        /* ==================== HERO SECTION ==================== */
         .hero-section {
             padding-top: calc(var(--header-height) + 3.5rem);
             padding-bottom: 5rem;
@@ -353,7 +337,6 @@
             transform: translateY(-2px);
         }
 
-        /* Glassmorphic Project Card in Hero */
         .hero-preview-card {
             background: var(--bg-card);
             border: 1px solid var(--border-card);
@@ -414,13 +397,6 @@
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        /* Stat Counter Strip */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -458,7 +434,6 @@
             font-weight: 500;
         }
 
-        /* ==================== SECTION STYLES ==================== */
         .section-block {
             padding: 5.5rem 0;
             position: relative;
@@ -494,7 +469,6 @@
             line-height: 1.65;
         }
 
-        /* Glass Cards */
         .custom-card {
             background: var(--bg-card);
             border: 1px solid var(--border-card);
@@ -529,7 +503,6 @@
             opacity: 1;
         }
 
-        /* Module Highlights */
         .module-badge {
             display: inline-flex;
             align-items: center;
@@ -541,29 +514,10 @@
             margin-bottom: 1.5rem;
         }
 
-        .module-badge.blue {
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .module-badge.purple {
-            background: rgba(139, 92, 246, 0.15);
-            color: #c084fc;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .module-badge.emerald {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .module-badge.amber {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
+        .module-badge.blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .module-badge.purple { background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .module-badge.emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .module-badge.amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 
         .module-title {
             font-size: 1.25rem;
@@ -595,7 +549,6 @@
             font-size: 1rem;
         }
 
-        /* Database Schema Pill Grid */
         .db-table-pill {
             display: inline-flex;
             align-items: center;
@@ -617,7 +570,6 @@
             background: rgba(59, 130, 246, 0.2);
         }
 
-        /* Architecture Layers */
         .arch-layer {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -648,7 +600,6 @@
             color: #fff;
         }
 
-        /* Team Cards */
         .team-card {
             background: var(--bg-card);
             border: 1px solid var(--border-card);
@@ -711,7 +662,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Quickstart Code Block */
         .terminal-box {
             background: #090d16;
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -737,15 +687,9 @@
             line-height: 1.7;
         }
 
-        .terminal-body .cmd {
-            color: #38bdf8;
-        }
+        .terminal-body .cmd { color: #38bdf8; }
+        .terminal-body .comment { color: #64748b; }
 
-        .terminal-body .comment {
-            color: #64748b;
-        }
-
-        /* Credentials Card */
         .cred-card {
             background: rgba(17, 24, 39, 0.7);
             border: 1px solid var(--border-card);
@@ -787,11 +731,8 @@
             padding: 0 4px;
             transition: var(--transition);
         }
-        .copy-btn:hover {
-            color: var(--first-color);
-        }
+        .copy-btn:hover { color: var(--first-color); }
 
-        /* Download Resource Card */
         .resource-card {
             display: flex;
             align-items: center;
@@ -834,7 +775,6 @@
         .resource-icon.pptx { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
         .resource-icon.code { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
 
-        /* ==================== FOOTER ==================== */
         .app-footer {
             background: #060913;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -863,9 +803,7 @@
             margin: 0;
         }
 
-        .footer-links li {
-            margin-bottom: 0.6rem;
-        }
+        .footer-links li { margin-bottom: 0.6rem; }
 
         .footer-links a {
             color: var(--text-muted);
@@ -892,14 +830,9 @@
             gap: 1rem;
         }
 
-        /* ==================== RESPONSIVE QUERIES ==================== */
         @media screen and (max-width: 991px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .hero-preview-card {
-                margin-top: 2.5rem;
-            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .hero-preview-card { margin-top: 2.5rem; }
         }
 
         @media screen and (max-width: 768px) {
@@ -918,33 +851,12 @@
                 transition: 0.4s ease;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
-
-            .nav-menu.show {
-                left: 0;
-            }
-
-            .nav-link-item {
-                font-size: 1.1rem;
-                width: 100%;
-                padding: 0.75rem 1rem;
-            }
-
-            .nav-toggle-btn {
-                display: block;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-            }
-
-            .btn-custom-primary, .btn-custom-secondary {
-                width: 100%;
-                justify-content: center;
-            }
+            .nav-menu.show { left: 0; }
+            .nav-link-item { font-size: 1.1rem; width: 100%; padding: 0.75rem 1rem; }
+            .nav-toggle-btn { display: block; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .hero-actions { flex-direction: column; }
+            .btn-custom-primary, .btn-custom-secondary { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -1052,7 +964,6 @@
                                 <p class="text-muted small mb-3">Enterprise React 19 + Express + MySQL 8.0</p>
                             </div>
 
-                            <!-- Live System Highlights inside preview card -->
                             <div class="p-3 rounded-3" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.06);">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-muted small"><i class='bx bx-server text-primary'></i> Backend API</span>
@@ -1497,7 +1408,7 @@
 
                 <div class="row g-4">
                     <div class="col-lg-6">
-                        <a href="College_ERP_Project_Report_109_Pages.docx" class="resource-card" download>
+                        <a href="../College_ERP_Project_Report_109_Pages.docx" class="resource-card" download>
                             <div class="resource-info">
                                 <div class="resource-icon docx">
                                     <i class='bx bxs-file-doc'></i>
@@ -1510,7 +1421,7 @@
                             <i class='bx bx-download fs-4 text-primary'></i>
                         </a>
 
-                        <a href="College_ERP_Documentation.md" class="resource-card">
+                        <a href="../College_ERP_Documentation.md" class="resource-card">
                             <div class="resource-info">
                                 <div class="resource-icon md">
                                     <i class='bx bxl-markdown'></i>
@@ -1525,7 +1436,7 @@
                     </div>
 
                     <div class="col-lg-6">
-                        <a href="College_ERP_Dashboard_Presentation.pptx" class="resource-card" download>
+                        <a href="../College_ERP_Dashboard_Presentation.pptx" class="resource-card" download>
                             <div class="resource-info">
                                 <div class="resource-icon pptx">
                                     <i class='bx bxs-file-blank'></i>
@@ -1710,7 +1621,6 @@
 
     <!-- Interactive Scripts -->
     <script>
-        // Responsive Menu Toggle
         const navMenu = document.getElementById('nav-menu');
         const navToggle = document.getElementById('nav-toggle');
 
@@ -1720,7 +1630,6 @@
             });
         }
 
-        // Close Mobile Menu on Click
         document.querySelectorAll('.nav-link-item').forEach(link => {
             link.addEventListener('click', () => {
                 if (navMenu.classList.contains('show')) {
@@ -1729,7 +1638,6 @@
             });
         });
 
-        // Active Link on Scroll
         const sections = document.querySelectorAll('section[id]');
         window.addEventListener('scroll', () => {
             const scrollY = window.pageYOffset;
@@ -1749,7 +1657,6 @@
             });
         });
 
-        // Copy Text Helper
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
                 alert('Copied to clipboard: ' + text);

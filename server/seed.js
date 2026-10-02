@@ -39,7 +39,8 @@ async function seed() {
 
         // 1. Create Users
         const adminPass = await hashPassword('AdminPassword123');
-        const facultyPass = await hashPassword('FacultyPassword123');
+        const prasadPass = await hashPassword('Prasadbabu123');
+        const sunilPass = await hashPassword('SunilPassword123');
         const studentPass = await hashPassword('StudentPassword123');
 
         // Admin User
@@ -52,20 +53,20 @@ async function seed() {
         // Faculty Users
         const [f1Result] = await db.query(
             'INSERT INTO users (name, email, password_hash, role, phone, date_of_birth) VALUES (?, ?, ?, ?, ?, ?)',
-            ['Dr. Indiana Jones', 'prof.jones@college.edu', facultyPass, 'faculty', '+91 88888 77777', '1975-07-07']
+            ['Dr. K. Prasad Babu', 'prasadbabu@college.edu', prasadPass, 'faculty', '+91 88888 77777', '1975-07-07']
         );
         const f1UserId = f1Result.insertId;
 
         const [f2Result] = await db.query(
             'INSERT INTO users (name, email, password_hash, role, phone, date_of_birth) VALUES (?, ?, ?, ?, ?, ?)',
-            ['Dr. Sarah Smith', 'prof.smith@college.edu', facultyPass, 'faculty', '+91 77777 66666', '1980-12-12']
+            ['Dr. Sarah Smith', 'prof.smith@college.edu', prasadPass, 'faculty', '+91 77777 66666', '1980-12-12']
         );
         const f2UserId = f2Result.insertId;
 
         // Student Users
         const [s1Result] = await db.query(
             'INSERT INTO users (name, email, password_hash, role, phone, date_of_birth) VALUES (?, ?, ?, ?, ?, ?)',
-            ['Alice Johnson', 'student.alice@college.edu', studentPass, 'student', '+91 98765 00001', '2005-01-20']
+            ['T.B.S. Sunil', 'sunil@college.edu', sunilPass, 'student', '+91 98765 00001', '2005-01-20']
         );
         const s1UserId = s1Result.insertId;
 
@@ -107,7 +108,7 @@ async function seed() {
         // 3. Link Students
         await db.query(
             'INSERT INTO students (user_id, roll_number, department_id, enrollment_year, semester, current_gpa) VALUES (?, ?, ?, ?, ?, ?)',
-            [s1UserId, 'CSE2024001', csDeptId, 2024, 3, 3.82]
+            [s1UserId, '2520030605', csDeptId, 2024, 3, 3.82]
         );
         await db.query(
             'INSERT INTO students (user_id, roll_number, department_id, enrollment_year, semester, current_gpa) VALUES (?, ?, ?, ?, ?, ?)',
@@ -120,12 +121,12 @@ async function seed() {
 
         // 4. Link Faculty
         await db.query(
-            'INSERT INTO faculty (user_id, employee_id, department_id, designation, qualification) VALUES (?, ?, ?, ?, ?)',
-            [f1UserId, 'FAC-CSE-001', csDeptId, 'Professor', 'Ph.D. in Computer Science']
+            'INSERT INTO faculty (user_id, faculty_name, employee_id, department_id, designation, qualification) VALUES (?, ?, ?, ?, ?, ?)',
+            [f1UserId, 'Dr. K. Prasad Babu', 'FAC-CSE-001', csDeptId, 'Professor', 'Ph.D. in Computer Science']
         );
         await db.query(
-            'INSERT INTO faculty (user_id, employee_id, department_id, designation, qualification) VALUES (?, ?, ?, ?, ?)',
-            [f2UserId, 'FAC-EE-001', eeDeptId, 'Associate Professor', 'Ph.D. in Electrical Engineering']
+            'INSERT INTO faculty (user_id, faculty_name, employee_id, department_id, designation, qualification) VALUES (?, ?, ?, ?, ?, ?)',
+            [f2UserId, 'Dr. Sarah Smith', 'FAC-EE-001', eeDeptId, 'Associate Professor', 'Ph.D. in Electrical Engineering']
         );
 
         console.log('Linked students and faculty.');
