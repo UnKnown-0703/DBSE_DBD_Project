@@ -12,6 +12,7 @@ import ManageCourses from './pages/admin/ManageCourses';
 
 // Faculty Pages
 import FacultyDashboard from './pages/faculty/FacultyDashboard';
+import FacultyWorkspace from './pages/faculty/FacultyWorkspace';
 import ClassDetail from './pages/faculty/ClassDetail';
 
 // Consolidated Student Workspace
@@ -60,10 +61,70 @@ const AppLayout = () => {
           </ProtectedRoute>
         } />
 
-        {/* Faculty Section */}
+        {/* Faculty Section - Upgraded Functional Faculty Portal */}
         <Route path="/faculty/dashboard" element={
           <ProtectedRoute allowedRoles={['faculty']}>
-            <FacultyDashboard />
+            <FacultyWorkspace tab="dashboard" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/courses" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="courses" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/students" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="students" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/attendance" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="attendance" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/grades" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="grades" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/quizzes" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="quizzes" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/materials" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="materials" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/timetable" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="timetable" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/announcements" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="announcements" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/analytics" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="analytics" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/exams" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="exams" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/queries" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="queries" />
+          </ProtectedRoute>
+        } />
+        <Route path="/faculty/profile" element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <FacultyWorkspace tab="profile" />
           </ProtectedRoute>
         } />
         <Route path="/faculty/class/:offeringId" element={

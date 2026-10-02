@@ -4,7 +4,8 @@ import {
   Bell, Calendar, GraduationCap, CreditCard, Building2, Clock, 
   BookOpen, UserCheck, AlertTriangle, Briefcase, Award, MapPin, 
   User, CheckCircle, Ticket, ShieldAlert, AlertOctagon, Printer, 
-  CheckSquare, Wrench, Send, Book, BookmarkCheck, RefreshCw, Phone, LifeBuoy
+  CheckSquare, Wrench, Send, Book, BookmarkCheck, RefreshCw, Phone, LifeBuoy,
+  Download, FileText, HelpCircle
 } from 'lucide-react';
 
 const StudentWorkspace = ({ tab }) => {
@@ -29,6 +30,10 @@ const StudentWorkspace = ({ tab }) => {
   const [transportInfo, setTransportInfo] = useState(null);
   const [supportTickets, setSupportTickets] = useState([]);
   const [registrationOffered, setRegistrationOffered] = useState([]);
+  const [grades, setGrades] = useState([]);
+  const [studentMaterials, setStudentMaterials] = useState([]);
+  const [studentQuizzes, setStudentQuizzes] = useState([]);
+  const [studentAssignments, setStudentAssignments] = useState([]);
 
   // Form & Interaction States
   const [errorMsg, setErrorMsg] = useState('');
@@ -141,6 +146,23 @@ const StudentWorkspace = ({ tab }) => {
       const libBooksRes = await fetch('http://127.0.0.1:5000/api/student/library/books', { headers });
       const libBooksData = await libBooksRes.json();
       setLibraryBooks(libBooksData);
+
+      // Academic GPA and grades
+      const gpaRes = await fetch('http://127.0.0.1:5000/api/student/academics/gpa', { headers });
+      const gpaData = await gpaRes.json();
+      setGrades(Array.isArray(gpaData) ? gpaData : []);
+
+      // Materials, Quizzes & Assignments published by faculty
+      try {
+        const mats = JSON.parse(localStorage.getItem('erp_global_materials') || '[]');
+        setStudentMaterials(mats);
+        const qzs = JSON.parse(localStorage.getItem('erp_global_published_quizzes') || '[]');
+        setStudentQuizzes(qzs);
+        const asg = JSON.parse(localStorage.getItem('erp_global_assignments') || '[]');
+        setStudentAssignments(asg);
+      } catch (e) {
+        console.error('Error loading materials/quizzes bridge:', e);
+      }
 
       setLoading(false);
     } catch (err) {
@@ -554,16 +576,61 @@ const StudentWorkspace = ({ tab }) => {
         </div>
       )}
 
-      {/* 5. COURSES CATALOG */}
+      {/* 5. COURSES CATALOG, MATERIALS & QUIZZES */}
       {tab === 'courses' && (
-        <div style={styles.splitGrid}>
-          {coursesCatalog.map(c => (
-            <div key={c.id} className="glass-card">
-              <span style={styles.timeTag}>{c.course_code} • {c.credits} Credits</span>
-              <h3 style={styles.itemTitle} style={{ margin: '0.25rem 0 0.5rem 0' }}>{c.name}</h3>
-              <p style={styles.itemDesc}>{c.description || 'Core syllabus details pending board updates.'}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h3 style={styles.panelTitle}>Department Course Catalog</h3>
+            <div style={styles.splitGrid}>
+              {coursesCatalog.map(c => (
+                <div key={c.id} className="glass-card">
+                  <span style={styles.timeTag}>{c.course_code} • {c.credits} Credits</span>
+                  <h3 style={{ ...styles.itemTitle, margin: '0.25rem 0 0.5rem 0' }}>{c.name}</h3>
+                  <p style={styles.itemDesc}>{c.description || 'Core syllabus details pending board updates.'}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div style={styles.splitGrid}>
+            <div className="glass-card">
+              <h3 style={styles.panelTitle}>Lecture Materials & Notes</h3>
+              <div style={styles.scroller}>
+                {studentMaterials.map(m => (
+                  <div key={m.id} style={styles.listItemFlex}>
+                    <div>
+                      <span className="badge badge-info">{m.category}</span>
+                      <h4 style={styles.itemTitle}>{m.title}</h4>
+                      <p style={styles.itemDesc}>{m.fileName} • {m.size} • {m.uploadedAt}</p>
+                    </div>
+                    <a href={m.fileUrl || '#'} download={m.fileName} className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Download size={14} /> Download
+                    </a>
+                  </div>
+                ))}
+                {studentMaterials.length === 0 && <p style={styles.emptyText}>No materials uploaded yet.</p>}
+              </div>
+            </div>
+
+            <div className="glass-card">
+              <h3 style={styles.panelTitle}>Active Quizzes & Assessments</h3>
+              <div style={styles.scroller}>
+                {studentQuizzes.map(q => (
+                  <div key={q.id} style={styles.listItemFlex}>
+                    <div>
+                      <span className="badge badge-warning">{q.durationMinutes} Mins</span>
+                      <h4 style={styles.itemTitle}>{q.title}</h4>
+                      <p style={styles.itemDesc}>Total Marks: {q.totalMarks} • Due: {q.dueDate}</p>
+                    </div>
+                    <button onClick={() => alert(`Starting Quiz: ${q.title}. Questions: ${q.questions?.length || 0}`)} className="btn btn-primary">
+                      Take Quiz
+                    </button>
+                  </div>
+                ))}
+                {studentQuizzes.length === 0 && <p style={styles.emptyText}>No published quizzes available.</p>}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

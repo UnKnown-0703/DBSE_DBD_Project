@@ -20,7 +20,15 @@ import {
   Clock, 
   LogOut,
   Users,
-  Layers
+  Layers,
+  Award,
+  FileText,
+  BarChart3,
+  HelpCircle,
+  FolderOpen,
+  CheckSquare,
+  Bell,
+  AlertTriangle
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -47,6 +55,18 @@ const Sidebar = () => {
       case 'faculty':
         return [
           { name: 'Dashboard', path: '/faculty/dashboard', icon: Home },
+          { name: 'My Courses', path: '/faculty/courses', icon: BookOpen },
+          { name: 'Students', path: '/faculty/students', icon: Users },
+          { name: 'Attendance', path: '/faculty/attendance', icon: CheckSquare },
+          { name: 'Grades & Marks', path: '/faculty/grades', icon: Award },
+          { name: 'Quizzes', path: '/faculty/quizzes', icon: HelpCircle },
+          { name: 'Assignments & Materials', path: '/faculty/materials', icon: FileText },
+          { name: 'Timetable', path: '/faculty/timetable', icon: Clock },
+          { name: 'Announcements', path: '/faculty/announcements', icon: Bell },
+          { name: 'Low Attendance (< 75%)', path: '/faculty/analytics', icon: AlertTriangle },
+          { name: 'Exams', path: '/faculty/exams', icon: Ticket },
+          { name: 'Student Queries', path: '/faculty/queries', icon: LifeBuoy },
+          { name: 'Profile & Peers', path: '/faculty/profile', icon: UserCheck },
         ];
       case 'student':
         return [

@@ -55,10 +55,11 @@ router.get('/registration/offered', async (req, res) => {
         // Fetch offerings for this department and semester that they are NOT already enrolled in
         const [offered] = await db.query(
             `SELECT co.id, co.semester, co.academic_year, co.schedule, co.classroom,
-                    c.name as course_name, c.course_code, c.credits, u.name as faculty_name
+                    c.name as course_name, c.course_code, c.credits, COALESCE(f.faculty_name, u.name) as faculty_name
              FROM course_offerings co
              JOIN courses c ON co.course_id = c.id
              JOIN users u ON co.faculty_id = u.id
+             LEFT JOIN faculty f ON u.id = f.user_id
              WHERE c.department_id = ? AND co.semester = ?
                AND co.id NOT IN (
                    SELECT course_offering_id FROM enrollments WHERE student_id = ? AND status != 'dropped'
@@ -105,11 +106,12 @@ router.post('/registration/drop', async (req, res) => {
 router.get('/timetable', async (req, res) => {
     try {
         const [timetable] = await db.query(
-            `SELECT co.id, co.schedule, co.classroom, c.name as course_name, c.course_code, u.name as faculty_name
+            `SELECT co.id, co.schedule, co.classroom, c.name as course_name, c.course_code, COALESCE(f.faculty_name, u.name) as faculty_name
              FROM enrollments e
              JOIN course_offerings co ON e.course_offering_id = co.id
              JOIN courses c ON co.course_id = c.id
              JOIN users u ON co.faculty_id = u.id
+             LEFT JOIN faculty f ON u.id = f.user_id
              WHERE e.student_id = ? AND e.status = 'enrolled'`,
             [req.user.id]
         );

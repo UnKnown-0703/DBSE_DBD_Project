@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Local MySQL database binary files
+db-data/
+
+# Environment and secrets
+.env
+*/.env
+
+# Build outputs
+dist/
+build/
+*/dist/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and OS files
+.vscode/
+.DS_Store
+Thumbs.db

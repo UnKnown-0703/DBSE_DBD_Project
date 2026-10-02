@@ -71,7 +71,7 @@ router.get('/users/:role', async (req, res) => {
             `;
         } else if (role === 'faculty') {
             query = `
-                SELECT u.id, u.name, u.email, u.phone, u.date_of_birth, u.created_at,
+                SELECT u.id, f.faculty_name AS name, u.email, u.phone, u.date_of_birth, u.created_at,
                        f.employee_id, f.designation, f.qualification,
                        d.name as department_name, d.id as department_id
                 FROM users u
@@ -133,8 +133,8 @@ router.post('/users', async (req, res) => {
                 throw new Error('Employee ID, department ID, designation, and qualification are required for faculty accounts.');
             }
             await connection.query(
-                'INSERT INTO faculty (user_id, employee_id, department_id, designation, qualification) VALUES (?, ?, ?, ?, ?)',
-                [newUserId, employee_id, department_id, designation, qualification]
+                'INSERT INTO faculty (user_id, faculty_name, employee_id, department_id, designation, qualification) VALUES (?, ?, ?, ?, ?, ?)',
+                [newUserId, name, employee_id, department_id, designation, qualification]
             );
         }
 
@@ -212,10 +212,11 @@ router.get('/offerings', async (req, res) => {
     try {
         const [offerings] = await db.query(
             `SELECT co.id, co.semester, co.academic_year, co.schedule, co.classroom, co.exam_date,
-                    c.name as course_name, c.course_code, u.name as faculty_name
+                    c.name as course_name, c.course_code, COALESCE(f.faculty_name, u.name) as faculty_name
              FROM course_offerings co
              JOIN courses c ON co.course_id = c.id
-             JOIN users u ON co.faculty_id = u.id`
+             JOIN users u ON co.faculty_id = u.id
+             LEFT JOIN faculty f ON u.id = f.user_id`
         );
         res.json(offerings);
     } catch (err) {

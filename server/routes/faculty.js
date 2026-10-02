@@ -224,7 +224,7 @@ router.put('/tickets/:ticketId', async (req, res) => {
 router.get('/department/peers', async (req, res) => {
     try {
         const [peers] = await db.query(
-            `SELECT u.id, u.name, u.email, u.phone, f.employee_id, f.designation, f.qualification
+            `SELECT u.id, f.faculty_name AS name, u.email, u.phone, f.employee_id, f.designation, f.qualification
              FROM users u
              JOIN faculty f ON u.id = f.user_id
              WHERE f.department_id = (SELECT department_id FROM faculty WHERE user_id = ?)
@@ -412,5 +412,214 @@ router.post('/courses/offer', async (req, res) => {
     }
 });
 
+// 16. Update a course offering
+router.put('/courses/offerings/:offeringId', async (req, res) => {
+    const { offeringId } = req.params;
+    const { schedule, classroom, exam_date, semester, academic_year } = req.body;
+
+    try {
+        const [offering] = await db.query('SELECT id FROM course_offerings WHERE id = ? AND faculty_id = ?', [offeringId, req.user.id]);
+        if (offering.length === 0) {
+            return res.status(403).json({ error: 'Access denied. You do not teach this course offering.' });
+        }
+
+        await db.query(
+            `UPDATE course_offerings 
+             SET schedule = COALESCE(?, schedule), 
+                 classroom = COALESCE(?, classroom), 
+                 exam_date = ?, 
+                 semester = COALESCE(?, semester), 
+                 academic_year = COALESCE(?, academic_year)
+             WHERE id = ?`,
+            [schedule, classroom, exam_date || null, semester, academic_year, offeringId]
+        );
+
+        res.json({ message: 'Course offering updated successfully.' });
+    } catch (err) {
+        console.error('Update course offering error:', err);
+        res.status(500).json({ error: 'Error updating course offering.' });
+    }
+});
+
+// 17. Delete a course offering
+router.delete('/courses/offerings/:offeringId', async (req, res) => {
+    const { offeringId } = req.params;
+    try {
+        const [offering] = await db.query('SELECT id FROM course_offerings WHERE id = ? AND faculty_id = ?', [offeringId, req.user.id]);
+        if (offering.length === 0) {
+            return res.status(403).json({ error: 'Access denied. You do not teach this course offering.' });
+        }
+
+        await db.query('DELETE FROM course_offerings WHERE id = ?', [offeringId]);
+        res.json({ message: 'Course offering removed successfully.' });
+    } catch (err) {
+        console.error('Delete course offering error:', err);
+        res.status(500).json({ error: 'Error deleting course offering.' });
+    }
+});
+
+// 18. Attendance History for a specific offering
+router.get('/classes/:offeringId/attendance/history', async (req, res) => {
+    const { offeringId } = req.params;
+    try {
+        const [offering] = await db.query('SELECT id FROM course_offerings WHERE id = ? AND faculty_id = ?', [offeringId, req.user.id]);
+        if (offering.length === 0) {
+            return res.status(403).json({ error: 'Access denied. You do not teach this course offering.' });
+        }
+
+        const [records] = await db.query(
+            `SELECT a.id, a.date, a.status, a.student_id, u.name as student_name, s.roll_number
+             FROM attendance a
+             JOIN students s ON a.student_id = s.user_id
+             JOIN users u ON s.user_id = u.id
+             WHERE a.course_offering_id = ?
+             ORDER BY a.date DESC, u.name ASC`,
+            [offeringId]
+        );
+        res.json(records);
+    } catch (err) {
+        console.error('Attendance history error:', err);
+        res.status(500).json({ error: 'Error fetching attendance history.' });
+    }
+});
+
+// 19. Create Faculty Announcement
+router.post('/announcements', async (req, res) => {
+    const { title, content, target_role } = req.body;
+    if (!title || !content) {
+        return res.status(400).json({ error: 'Title and content are required.' });
+    }
+
+    try {
+        const [result] = await db.query(
+            `INSERT INTO announcements (title, content, target_role, created_by)
+             VALUES (?, ?, ?, ?)`,
+            [title, content, target_role || 'all', req.user.id]
+        );
+        res.json({ message: 'Announcement created successfully.', id: result.insertId });
+    } catch (err) {
+        console.error('Create announcement error:', err);
+        res.status(500).json({ error: 'Error creating announcement.' });
+    }
+});
+
+// 20. Update Faculty Announcement
+router.put('/announcements/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, content, target_role } = req.body;
+
+    try {
+        const [ann] = await db.query('SELECT id FROM announcements WHERE id = ? AND created_by = ?', [id, req.user.id]);
+        if (ann.length === 0) {
+            return res.status(403).json({ error: 'Access denied. You can only edit your own announcements.' });
+        }
+
+        await db.query(
+            `UPDATE announcements 
+             SET title = COALESCE(?, title), content = COALESCE(?, content), target_role = COALESCE(?, target_role)
+             WHERE id = ?`,
+            [title, content, target_role, id]
+        );
+        res.json({ message: 'Announcement updated successfully.' });
+    } catch (err) {
+        console.error('Update announcement error:', err);
+        res.status(500).json({ error: 'Error updating announcement.' });
+    }
+});
+
+// 21. Delete Faculty Announcement
+router.delete('/announcements/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [ann] = await db.query('SELECT id FROM announcements WHERE id = ? AND created_by = ?', [id, req.user.id]);
+        if (ann.length === 0) {
+            return res.status(403).json({ error: 'Access denied. You can only delete your own announcements.' });
+        }
+
+        await db.query('DELETE FROM announcements WHERE id = ?', [id]);
+        res.json({ message: 'Announcement deleted successfully.' });
+    } catch (err) {
+        console.error('Delete announcement error:', err);
+        res.status(500).json({ error: 'Error deleting announcement.' });
+    }
+});
+
+// 22. Reply to Academic Support Ticket
+router.post('/tickets/:ticketId/reply', async (req, res) => {
+    const { ticketId } = req.params;
+    const { replyMessage, status } = req.body;
+
+    if (!replyMessage) {
+        return res.status(400).json({ error: 'Reply message is required.' });
+    }
+
+    try {
+        const [ticket] = await db.query(
+            `SELECT st.id, st.description 
+             FROM support_tickets st
+             JOIN students s ON st.student_id = s.user_id
+             WHERE st.id = ? AND s.department_id = (SELECT department_id FROM faculty WHERE user_id = ?)`,
+            [ticketId, req.user.id]
+        );
+
+        if (ticket.length === 0) {
+            return res.status(403).json({ error: 'Access denied. Ticket does not belong to your department.' });
+        }
+
+        const facultyName = req.user.name || 'Faculty Advisor';
+        const updatedDesc = `${ticket[0].description}\n\n[Reply from ${facultyName} (${new Date().toLocaleDateString()})]:\n${replyMessage}`;
+        const newStatus = status || 'in_progress';
+
+        await db.query(
+            'UPDATE support_tickets SET description = ?, status = ? WHERE id = ?',
+            [updatedDesc, newStatus, ticketId]
+        );
+
+        res.json({ message: 'Reply sent and ticket updated.' });
+    } catch (err) {
+        console.error('Ticket reply error:', err);
+        res.status(500).json({ error: 'Error sending ticket reply.' });
+    }
+});
+
+// 22. Get student attendance records and defaulters (< 75% attendance)
+router.get('/attendance/defaulters', async (req, res) => {
+    try {
+        const [records] = await db.query(
+            `SELECT u.id as user_id, u.name, u.email, u.phone, s.roll_number, s.semester,
+                    c.course_code, c.name as course_name, co.id as offering_id, co.classroom, co.schedule,
+                    (SELECT COUNT(*) FROM attendance a WHERE a.student_id = u.id AND a.course_offering_id = co.id AND a.status = 'present') as present_count,
+                    (SELECT COUNT(*) FROM attendance a WHERE a.student_id = u.id AND a.course_offering_id = co.id) as total_count
+             FROM enrollments e
+             JOIN course_offerings co ON e.course_offering_id = co.id
+             JOIN courses c ON co.course_id = c.id
+             JOIN students s ON e.student_id = s.user_id
+             JOIN users u ON s.user_id = u.id
+             WHERE co.faculty_id = ? OR s.department_id = (SELECT department_id FROM faculty WHERE user_id = ?)`,
+            [req.user.id, req.user.id]
+        );
+
+        const formatted = records.map(r => {
+            const total = parseInt(r.total_count) || 0;
+            const present = parseInt(r.present_count) || 0;
+            const rate = total > 0 ? parseFloat(((present / total) * 100).toFixed(1)) : 100.0;
+            return {
+                ...r,
+                total_count: total,
+                present_count: present,
+                absent_count: total - present,
+                attendance_rate: rate,
+                is_defaulter: rate < 75.0
+            };
+        });
+
+        res.json(formatted);
+    } catch (err) {
+        console.error('Defaulters route error:', err);
+        res.status(500).json({ error: 'Error fetching attendance records.' });
+    }
+});
+
 module.exports = router;
+
 

@@ -107,7 +107,7 @@ const Login = () => {
           </button>
           
           <p style={styles.registerRedirect}>
-            Don't have an account? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: '600' }}>Register here</Link>
+            Admin & Faculty register accounts internally. Contact Administration for access.
           </p>
         </form>
       </div>

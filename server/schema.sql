@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS students (
 -- 4. Faculty Table (Extends users table)
 CREATE TABLE IF NOT EXISTS faculty (
     user_id INT PRIMARY KEY,
+    faculty_name VARCHAR(100) NOT NULL,
     employee_id VARCHAR(20) UNIQUE NOT NULL,
     department_id INT NOT NULL,
     designation VARCHAR(50) NOT NULL,
