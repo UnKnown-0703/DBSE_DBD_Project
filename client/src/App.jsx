@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
@@ -224,11 +224,11 @@ const AppLayout = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <AppLayout />
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

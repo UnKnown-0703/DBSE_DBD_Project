@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../utils/api';
 import { 
   Users, 
   Layers, 
@@ -31,17 +32,17 @@ const AdminDashboard = () => {
       const headers = { 'Authorization': `Bearer ${token}` };
       
       // Fetch stats
-      const statsRes = await fetch('http://127.0.0.1:5000/api/admin/stats', { headers });
+      const statsRes = await fetch(`${API_BASE_URL}/api/admin/stats`, { headers });
       const statsData = await statsRes.json();
       setStats(statsData);
 
       // Fetch infra tickets
-      const ticketsRes = await fetch('http://127.0.0.1:5000/api/admin/infra-tickets', { headers });
+      const ticketsRes = await fetch(`${API_BASE_URL}/api/admin/infra-tickets`, { headers });
       const ticketsData = await ticketsRes.json();
       setInfraTickets(ticketsData.filter(t => t.status === 'open'));
 
       // Fetch announcements
-      const announceRes = await fetch('http://127.0.0.1:5000/api/admin/announcements', { headers });
+      const announceRes = await fetch(`${API_BASE_URL}/api/admin/announcements`, { headers });
       const announceData = await announceRes.json();
       setAnnouncements(announceData);
 
@@ -66,7 +67,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/admin/announcements', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/announcements`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ const AdminDashboard = () => {
 
   const handleResolveTicket = async (ticketId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/admin/infra-tickets/${ticketId}/resolve`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/infra-tickets/${ticketId}/resolve`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });

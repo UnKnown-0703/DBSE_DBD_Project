@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../utils/api';
 import { 
   Home, BookOpen, Users, Calendar, Award, HelpCircle, FileText, 
   Clock, Bell, BarChart3, Ticket, LifeBuoy, UserCheck, Plus, 
@@ -217,45 +218,45 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
       const headers = { 'Authorization': `Bearer ${token}` };
 
       // 1. Courses taught
-      const coursesRes = await fetch('http://127.0.0.1:5000/api/faculty/courses', { headers });
+      const coursesRes = await fetch(`${API_BASE_URL}/api/faculty/courses`, { headers });
       const coursesData = await coursesRes.json();
       const loadedCourses = Array.isArray(coursesData) ? coursesData : [];
       setCourses(loadedCourses);
 
       // 2. Course Catalog for Department
-      const catRes = await fetch('http://127.0.0.1:5000/api/faculty/courses/catalog', { headers });
+      const catRes = await fetch(`${API_BASE_URL}/api/faculty/courses/catalog`, { headers });
       const catData = await catRes.json();
       setCatalog(Array.isArray(catData) ? catData : []);
 
       // 3. Department Students
-      const studentsRes = await fetch('http://127.0.0.1:5000/api/faculty/department/students', { headers });
+      const studentsRes = await fetch(`${API_BASE_URL}/api/faculty/department/students`, { headers });
       const studentsData = await studentsRes.json();
       setAllStudents(Array.isArray(studentsData) ? studentsData : []);
 
       // 4. Announcements
-      const annRes = await fetch('http://127.0.0.1:5000/api/admin/announcements', { headers });
+      const annRes = await fetch(`${API_BASE_URL}/api/admin/announcements`, { headers });
       const annData = await annRes.json();
       if (Array.isArray(annData)) {
         setAnnouncements(annData.filter(a => a.target_role === 'all' || a.target_role === 'faculty'));
       }
 
       // 5. Academic Support Tickets
-      const ticketsRes = await fetch('http://127.0.0.1:5000/api/faculty/department/tickets', { headers });
+      const ticketsRes = await fetch(`${API_BASE_URL}/api/faculty/department/tickets`, { headers });
       const ticketsData = await ticketsRes.json();
       setTickets(Array.isArray(ticketsData) ? ticketsData : []);
 
       // 6. No Dues
-      const noduesRes = await fetch('http://127.0.0.1:5000/api/faculty/department/nodues', { headers });
+      const noduesRes = await fetch(`${API_BASE_URL}/api/faculty/department/nodues`, { headers });
       const noduesData = await noduesRes.json();
       setNodues(Array.isArray(noduesData) ? noduesData : []);
 
       // 7. Peers
-      const peersRes = await fetch('http://127.0.0.1:5000/api/faculty/department/peers', { headers });
+      const peersRes = await fetch(`${API_BASE_URL}/api/faculty/department/peers`, { headers });
       const peersData = await peersRes.json();
       setPeers(Array.isArray(peersData) ? peersData : []);
 
       // 8. Low Attendance Records (< 75%)
-      const defRes = await fetch('http://127.0.0.1:5000/api/faculty/attendance/defaulters', { headers });
+      const defRes = await fetch(`${API_BASE_URL}/api/faculty/attendance/defaulters`, { headers });
       const defData = await defRes.json();
       setDefaulters(Array.isArray(defData) ? defData : []);
 
@@ -328,7 +329,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
       return;
     }
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/faculty/courses/offer', {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/courses/offer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(courseForm)
@@ -347,7 +348,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
   const handleUpdateOffering = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/courses/offerings/${editingCourse.id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/courses/offerings/${editingCourse.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(courseForm)
@@ -365,7 +366,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
 
   const handleDeleteOffering = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/courses/offerings/${deletingCourseId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/courses/offerings/${deletingCourseId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -425,7 +426,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
   const loadRosterForAttendance = async (offeringId) => {
     try {
       setAttLoading(true);
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${offeringId}/students`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/classes/${offeringId}/students`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -444,7 +445,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
 
   const loadAttendanceHistory = async (offeringId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${offeringId}/attendance/history`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/classes/${offeringId}/attendance/history`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -475,7 +476,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
         status: attStatuses[uid]
       }));
 
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${attCourseId}/attendance`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/classes/${attCourseId}/attendance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ date: attDate, records: recordsPayload })
@@ -546,7 +547,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
 
     try {
       setSavingGrades(true);
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${gradesCourseId}/grades`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/classes/${gradesCourseId}/grades`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ student_id: studentId, grade: letter })
@@ -694,7 +695,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
       return;
     }
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/faculty/announcements', {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/announcements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(announceForm)
@@ -713,7 +714,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
 
   const handleDeleteAnnouncement = async (id) => {
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/announcements/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/announcements/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -749,7 +750,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
       return;
     }
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/faculty/tickets/${ticketId}/reply`, {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/tickets/${ticketId}/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ replyMessage: replyText, status: 'resolved' })
@@ -776,7 +777,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/faculty/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/faculty/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ phone: profilePhone, qualification: profileQual })
@@ -2393,7 +2394,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
                                 style={styles.primaryBtnSm}
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(`http://127.0.0.1:5000/api/faculty/nodues/${nd.student_id}`, {
+                                    const res = await fetch(`${API_BASE_URL}/api/faculty/nodues/${nd.student_id}`, {
                                       method: 'PUT',
                                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                       body: JSON.stringify({

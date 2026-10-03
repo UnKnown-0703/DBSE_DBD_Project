@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../utils/api';
 import { 
   Bell, Calendar, GraduationCap, CreditCard, Building2, Clock, 
   BookOpen, UserCheck, AlertTriangle, Briefcase, Award, MapPin, 
@@ -65,90 +66,90 @@ const StudentWorkspace = ({ tab }) => {
       const headers = { 'Authorization': `Bearer ${token}` };
 
       // Profile
-      const profileRes = await fetch('http://127.0.0.1:5000/api/student/profile', { headers });
+      const profileRes = await fetch(`${API_BASE_URL}/api/student/profile`, { headers });
       const profileData = await profileRes.json();
       setProfile(profileData);
       setPhoneInput(profileData.phone || '');
       setDobInput(profileData.date_of_birth ? profileData.date_of_birth.split('T')[0] : '');
 
       // Notices
-      const announceRes = await fetch('http://127.0.0.1:5000/api/admin/announcements', { headers });
+      const announceRes = await fetch(`${API_BASE_URL}/api/admin/announcements`, { headers });
       const announceData = await announceRes.json();
       setAnnouncements(announceData.filter(a => a.target_role === 'all' || a.target_role === 'student'));
 
       // Timetable
-      const timetableRes = await fetch('http://127.0.0.1:5000/api/student/timetable', { headers });
+      const timetableRes = await fetch(`${API_BASE_URL}/api/student/timetable`, { headers });
       const timetableData = await timetableRes.json();
       setTimetable(timetableData);
 
       // Attendance
-      const attendanceRes = await fetch('http://127.0.0.1:5000/api/student/attendance', { headers });
+      const attendanceRes = await fetch(`${API_BASE_URL}/api/student/attendance`, { headers });
       const attendanceData = await attendanceRes.json();
       setAttendanceSummary(attendanceData.summary || []);
       setAttendanceLogs(attendanceData.logs || []);
 
       // Placements
-      const placementsRes = await fetch('http://127.0.0.1:5000/api/student/placements', { headers });
+      const placementsRes = await fetch(`${API_BASE_URL}/api/student/placements`, { headers });
       const placementsData = await placementsRes.json();
       setPlacements(placementsData);
 
       // Courses Catalog
-      const coursesRes = await fetch('http://127.0.0.1:5000/api/student/courses', { headers });
+      const coursesRes = await fetch(`${API_BASE_URL}/api/student/courses`, { headers });
       const coursesData = await coursesRes.json();
       setCoursesCatalog(coursesData);
 
       // Fees
-      const feesRes = await fetch('http://127.0.0.1:5000/api/student/fees', { headers });
+      const feesRes = await fetch(`${API_BASE_URL}/api/student/fees`, { headers });
       const feesData = await feesRes.json();
       setFees(feesData);
 
       // Hostel info
-      const hostelRes = await fetch('http://127.0.0.1:5000/api/student/hostel', { headers });
+      const hostelRes = await fetch(`${API_BASE_URL}/api/student/hostel`, { headers });
       const hostelData = await hostelRes.json();
       setHostelInfo(hostelData);
 
       // Hallticket
-      const htRes = await fetch('http://127.0.0.1:5000/api/student/hallticket', { headers });
+      const htRes = await fetch(`${API_BASE_URL}/api/student/hallticket`, { headers });
       const htData = await htRes.json();
       setHallticketInfo(htData);
 
       // Infra tickets
-      const infraRes = await fetch('http://127.0.0.1:5000/api/student/infra-tickets', { headers });
+      const infraRes = await fetch(`${API_BASE_URL}/api/student/infra-tickets`, { headers });
       const infraData = await infraRes.json();
       setInfraTickets(infraData);
 
       // Library checkouts
-      const borrowsRes = await fetch('http://127.0.0.1:5000/api/student/library/borrows', { headers });
+      const borrowsRes = await fetch(`${API_BASE_URL}/api/student/library/borrows`, { headers });
       const borrowsData = await borrowsRes.json();
       setLibraryBorrows(borrowsData);
 
       // No dues clearance
-      const ndRes = await fetch('http://127.0.0.1:5000/api/student/nodue', { headers });
+      const ndRes = await fetch(`${API_BASE_URL}/api/student/nodue`, { headers });
       const ndData = await ndRes.json();
       setNoDuesInfo(ndData);
 
       // Transport route
-      const transRes = await fetch('http://127.0.0.1:5000/api/student/transport', { headers });
+      const transRes = await fetch(`${API_BASE_URL}/api/student/transport`, { headers });
       const transData = await transRes.json();
       setTransportInfo(transData);
 
       // Helpdesk support tickets
-      const ticketsRes = await fetch('http://127.0.0.1:5000/api/student/support-tickets', { headers });
+      const ticketsRes = await fetch(`${API_BASE_URL}/api/student/support-tickets`, { headers });
       const ticketsData = await ticketsRes.json();
       setSupportTickets(ticketsData);
 
       // offered registration courses
-      const regOfferedRes = await fetch('http://127.0.0.1:5000/api/student/registration/offered', { headers });
+      const regOfferedRes = await fetch(`${API_BASE_URL}/api/student/registration/offered`, { headers });
       const regOfferedData = await regOfferedRes.json();
       setRegistrationOffered(regOfferedData);
 
       // Library books catalog
-      const libBooksRes = await fetch('http://127.0.0.1:5000/api/student/library/books', { headers });
+      const libBooksRes = await fetch(`${API_BASE_URL}/api/student/library/books`, { headers });
       const libBooksData = await libBooksRes.json();
       setLibraryBooks(libBooksData);
 
       // Academic GPA and grades
-      const gpaRes = await fetch('http://127.0.0.1:5000/api/student/academics/gpa', { headers });
+      const gpaRes = await fetch(`${API_BASE_URL}/api/student/academics/gpa`, { headers });
       const gpaData = await gpaRes.json();
       setGrades(Array.isArray(gpaData) ? gpaData : []);
 
@@ -188,7 +189,7 @@ const StudentWorkspace = ({ tab }) => {
   // 1. Enrollment
   const handleEnroll = async (offeringId) => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/registration/enroll', {
+      const response = await fetch(`${API_BASE_URL}/api/student/registration/enroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ offeringId })
@@ -202,7 +203,7 @@ const StudentWorkspace = ({ tab }) => {
   const handleDrop = async (offeringId) => {
     if (!window.confirm('Drop course?')) return;
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/registration/drop', {
+      const response = await fetch(`${API_BASE_URL}/api/student/registration/drop`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ offeringId })
@@ -216,7 +217,7 @@ const StudentWorkspace = ({ tab }) => {
   // 2. Placements
   const handleApplyPlacement = async (driveId, company) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/student/placements/${driveId}/apply`, {
+      const response = await fetch(`${API_BASE_URL}/api/student/placements/${driveId}/apply`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -239,7 +240,7 @@ const StudentWorkspace = ({ tab }) => {
     setProcessingPay(true);
     setTimeout(async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/student/fees/${selectedFee.id}/pay`, {
+        const response = await fetch(`${API_BASE_URL}/api/student/fees/${selectedFee.id}/pay`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ paymentMethod: payMethod })
@@ -258,7 +259,7 @@ const StudentWorkspace = ({ tab }) => {
   // 4. Hostel Booking
   const handleBookHostel = async (hostelId) => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/hostel/book', {
+      const response = await fetch(`${API_BASE_URL}/api/student/hostel/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ hostelId })
@@ -275,7 +276,7 @@ const StudentWorkspace = ({ tab }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/student/library/books?search=${searchQuery}`, {
+      const response = await fetch(`${API_BASE_URL}/api/student/library/books?search=${searchQuery}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -286,7 +287,7 @@ const StudentWorkspace = ({ tab }) => {
 
   const handleLibraryBorrow = async (bookId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/student/library/borrow/${bookId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/student/library/borrow/${bookId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -299,7 +300,7 @@ const StudentWorkspace = ({ tab }) => {
 
   const handleLibraryReturn = async (borrowId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/student/library/return/${borrowId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/student/library/return/${borrowId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -313,7 +314,7 @@ const StudentWorkspace = ({ tab }) => {
   // 6. Transport routes selector
   const handleEnrollTransport = async (routeId) => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/transport/enroll', {
+      const response = await fetch(`${API_BASE_URL}/api/student/transport/enroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ routeId })
@@ -328,7 +329,7 @@ const StudentWorkspace = ({ tab }) => {
   const handlePostTicket = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/support-tickets', {
+      const response = await fetch(`${API_BASE_URL}/api/student/support-tickets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ title: ticketTitle, category: ticketCat, description: ticketDesc })
@@ -345,7 +346,7 @@ const StudentWorkspace = ({ tab }) => {
   const handlePostInfraComplaint = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/infra-tickets', {
+      const response = await fetch(`${API_BASE_URL}/api/student/infra-tickets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ locationType: infraLocType, locationName: infraLocName, issueDescription: infraDesc })
@@ -363,7 +364,7 @@ const StudentWorkspace = ({ tab }) => {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/student/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/student/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ phone: phoneInput, date_of_birth: dobInput })

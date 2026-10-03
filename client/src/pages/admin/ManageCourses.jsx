@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Layers, Plus, X, AlertTriangle } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const ManageCourses = () => {
   const { token } = useContext(AuthContext);
@@ -44,26 +45,26 @@ const ManageCourses = () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       
-      const deptsRes = await fetch('http://127.0.0.1:5000/api/admin/departments', { headers });
+      const deptsRes = await fetch(`${API_BASE_URL}/api/admin/departments`, { headers });
       const deptsData = await deptsRes.json();
       setDepartments(deptsData);
       if (deptsData.length > 0) {
         setCourseDeptId(deptsData[0].id.toString());
       }
 
-      const coursesRes = await fetch('http://127.0.0.1:5000/api/admin/courses', { headers });
+      const coursesRes = await fetch(`${API_BASE_URL}/api/admin/courses`, { headers });
       const coursesData = await coursesRes.json();
       setCourses(coursesData);
       if (coursesData.length > 0) {
         setOfferingCourseId(coursesData[0].id.toString());
       }
 
-      const offeringsRes = await fetch('http://127.0.0.1:5000/api/admin/offerings', { headers });
+      const offeringsRes = await fetch(`${API_BASE_URL}/api/admin/offerings`, { headers });
       const offeringsData = await offeringsRes.json();
       setOfferings(offeringsData);
 
       // Fetch faculty users list for class offerings registration
-      const facultyRes = await fetch('http://127.0.0.1:5000/api/admin/users/faculty', { headers });
+      const facultyRes = await fetch(`${API_BASE_URL}/api/admin/users/faculty`, { headers });
       const facultyData = await facultyRes.json();
       setFaculty(facultyData);
       if (facultyData.length > 0) {
@@ -98,7 +99,7 @@ const ManageCourses = () => {
 
   const handleCreateDepartment = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/admin/departments', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/departments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ const ManageCourses = () => {
 
   const handleCreateCourse = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/admin/courses', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/courses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +149,7 @@ const ManageCourses = () => {
 
   const handleCreateOffering = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/admin/offerings', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/offerings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

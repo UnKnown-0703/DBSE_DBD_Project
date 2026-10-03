@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { Search, UserPlus, Trash2, X, AlertTriangle, Upload, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { downloadStudentTemplate, downloadFacultyTemplate } from '../../utils/excelTemplate';
+import { API_BASE_URL } from '../../utils/api';
 
 const ManageUsers = () => {
   const { token } = useContext(AuthContext);
@@ -46,7 +47,7 @@ const ManageUsers = () => {
     setLoading(true);
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const response = await fetch(`http://127.0.0.1:5000/api/admin/users/${activeTab}`, { headers });
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${activeTab}`, { headers });
       const data = await response.json();
       setUsers(data);
       setLoading(false);
@@ -58,7 +59,7 @@ const ManageUsers = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/admin/departments', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/departments`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -155,7 +156,7 @@ const ManageUsers = () => {
     setBulkSuccess('');
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/bulk/bulk-register', {
+      const response = await fetch(`${API_BASE_URL}/api/bulk/bulk-register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +209,7 @@ const ManageUsers = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/admin/users', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +242,7 @@ const ManageUsers = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/admin/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

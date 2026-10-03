@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { ArrowLeft, Check, Calendar, Award, CheckSquare, Save, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { API_BASE_URL } from '../../utils/api';
 
 const ClassDetail = () => {
   const { offeringId } = useParams();
@@ -32,7 +33,7 @@ const ClassDetail = () => {
       const headers = { 'Authorization': `Bearer ${token}` };
       
       // Fetch roster
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${offeringId}/students`, { headers });
+      const response = await fetch(`${API_BASE_URL}/api/faculty/classes/${offeringId}/students`, { headers });
       const data = await response.json();
       
       if (!response.ok) throw new Error(data.error);
@@ -47,7 +48,7 @@ const ClassDetail = () => {
       setAttendanceRecords(initialRecords);
 
       // Extract course header details from teaching schedule list
-      const coursesRes = await fetch('http://127.0.0.1:5000/api/faculty/courses', { headers });
+      const coursesRes = await fetch(`${API_BASE_URL}/api/faculty/courses`, { headers });
       const coursesData = await coursesRes.json();
       const course = coursesData.find(c => c.id === parseInt(offeringId));
       if (course) setCourseDetails(course);
@@ -82,7 +83,7 @@ const ClassDetail = () => {
     }));
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${offeringId}/attendance`, {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/classes/${offeringId}/attendance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ const ClassDetail = () => {
   const handleSaveGrade = async (studentId) => {
     setGradingSuccess('');
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/classes/${offeringId}/grades`, {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/classes/${offeringId}/grades`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -96,3 +96,11 @@ In the project root, execute:
 * **Admin:** `admin@college.edu` / `AdminPassword123`
 * **Faculty (Dr. Prasad Babu):** `prasadbabu@college.edu` / `Prasadbabu123` *(or `FacultyPassword123`)*
 * **Student (T.B.S. Sunil):** `sunil@college.edu` (Roll No: `2520030605`) / `SunilPassword123` *(or `StudentPassword123`)*
+
+---
+
+## 🌐 Live GitHub Pages & Cloud Backend
+* **Project Showcase & Portfolio:** [https://unknown-0703.github.io/DBSE_DBD_Project/](https://unknown-0703.github.io/DBSE_DBD_Project/)
+* **Live Interactive College ERP App:** [https://unknown-0703.github.io/DBSE_DBD_Project/app/](https://unknown-0703.github.io/DBSE_DBD_Project/app/)
+* **Full-Stack MySQL Workbench & Cloud Deployment Guide:** [`DEPLOYMENT_AND_DATABASE_GUIDE.md`](./DEPLOYMENT_AND_DATABASE_GUIDE.md)
+

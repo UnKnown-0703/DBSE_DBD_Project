@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, UserPlus, AlertCircle, GraduationCap } from 'lucide-react';
+import { API_BASE_URL } from '../utils/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

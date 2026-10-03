@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../utils/api';
 import { 
   BookOpen, 
   Calendar, 
@@ -88,7 +89,7 @@ const FacultyDashboard = () => {
         const headers = { 'Authorization': `Bearer ${token}` };
         
         // Fetch courses taught
-        const coursesRes = await fetch('http://127.0.0.1:5000/api/faculty/courses', { headers });
+        const coursesRes = await fetch(`${API_BASE_URL}/api/faculty/courses`, { headers });
         if (coursesRes.status === 401 || coursesRes.status === 403) {
           logout();
           navigate('/login');
@@ -102,7 +103,7 @@ const FacultyDashboard = () => {
         }
 
         // Fetch notices for faculty
-        const announceRes = await fetch('http://127.0.0.1:5000/api/admin/announcements', { headers });
+        const announceRes = await fetch(`${API_BASE_URL}/api/admin/announcements`, { headers });
         if (announceRes.status === 401 || announceRes.status === 403) {
           logout();
           navigate('/login');
@@ -142,7 +143,7 @@ const FacultyDashboard = () => {
       const headers = { 'Authorization': `Bearer ${token}` };
       
       // Fetch department student No Dues records
-      const noduesRes = await fetch('http://127.0.0.1:5000/api/faculty/department/nodues', { headers });
+      const noduesRes = await fetch(`${API_BASE_URL}/api/faculty/department/nodues`, { headers });
       if (noduesRes.status === 401 || noduesRes.status === 403) {
         logout();
         navigate('/login');
@@ -156,7 +157,7 @@ const FacultyDashboard = () => {
       }
 
       // Fetch department academic support tickets
-      const ticketRes = await fetch('http://127.0.0.1:5000/api/faculty/department/tickets', { headers });
+      const ticketRes = await fetch(`${API_BASE_URL}/api/faculty/department/tickets`, { headers });
       if (ticketRes.status === 401 || ticketRes.status === 403) {
         logout();
         navigate('/login');
@@ -180,7 +181,7 @@ const FacultyDashboard = () => {
     setProfileLoading(true);
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const peersRes = await fetch('http://127.0.0.1:5000/api/faculty/department/peers', { headers });
+      const peersRes = await fetch(`${API_BASE_URL}/api/faculty/department/peers`, { headers });
       if (peersRes.status === 401 || peersRes.status === 403) {
         logout();
         navigate('/login');
@@ -205,7 +206,7 @@ const FacultyDashboard = () => {
     setError('');
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/faculty/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +229,7 @@ const FacultyDashboard = () => {
     setSuccess('');
     setError('');
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/tickets/${ticketId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -262,7 +263,7 @@ const FacultyDashboard = () => {
     payload[category] = currentStatus === 'cleared' ? 'pending' : 'cleared';
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/nodues/${studentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/nodues/${studentId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -290,7 +291,7 @@ const FacultyDashboard = () => {
     setSuccess('');
     setError('');
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/tickets/${ticketId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -311,7 +312,7 @@ const FacultyDashboard = () => {
     setSuccess('');
     setError('');
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/faculty/students/${studentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/students/${studentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -347,7 +348,7 @@ const FacultyDashboard = () => {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -442,7 +443,7 @@ const FacultyDashboard = () => {
     setBulkSuccess('');
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/bulk/bulk-register', {
+      const response = await fetch(`${API_BASE_URL}/api/bulk/bulk-register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -472,7 +473,7 @@ const FacultyDashboard = () => {
   const fetchCatalog = async () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const res = await fetch('http://127.0.0.1:5000/api/faculty/courses/catalog', { headers });
+      const res = await fetch(`${API_BASE_URL}/api/faculty/courses/catalog`, { headers });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       if (Array.isArray(data)) {
@@ -507,7 +508,7 @@ const FacultyDashboard = () => {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/faculty/courses/offer', {
+      const response = await fetch(`${API_BASE_URL}/api/faculty/courses/offer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -521,7 +522,7 @@ const FacultyDashboard = () => {
       setOfferingSuccess('Course offering created successfully!');
       
       // Refresh teaching courses list
-      const coursesRes = await fetch('http://127.0.0.1:5000/api/faculty/courses', {
+      const coursesRes = await fetch(`${API_BASE_URL}/api/faculty/courses`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const coursesData = await coursesRes.json();
