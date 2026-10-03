@@ -179,7 +179,7 @@ const Login = () => {
               <button 
                 type="button" 
                 style={styles.quickCredBtn} 
-                onClick={() => handleFillDemo('prasadbabu@college.edu', 'Prasadbabu123')}
+                onClick={() => handleFillDemo('prasad.babu@college.edu', 'FacultyPassword123')}
               >
                 Faculty
               </button>
