@@ -20,8 +20,8 @@ Portfolio: [ramyakrishnad.github.io](https://ramyakrishnad.github.io/)
 ---
 
 ## 📑 Project Documentation
-The comprehensive academic project documentation (matching the university 109-page format, rubrics, and guide evaluation criteria) is available in both Word and Markdown formats:
-* **Word Document (Exact 109 Pages - `.docx`):** [`College_ERP_Project_Report_109_Pages.docx`](./College_ERP_Project_Report_109_Pages.docx)
+The comprehensive academic project documentation (matching university format, rubrics, and guide evaluation criteria) is available in both Word and Markdown formats:
+* **Word Document (`.docx`):** [`College_ERP_Project_Report_109_Pages.docx`](./College_ERP_Project_Report_109_Pages.docx)
 * **Markdown Document (`.md`):** [`College_ERP_Documentation.md`](./College_ERP_Documentation.md)
 * **Project Presentation (`.pptx`):** [`College_ERP_Dashboard_Presentation.pptx`](./College_ERP_Dashboard_Presentation.pptx)
 
