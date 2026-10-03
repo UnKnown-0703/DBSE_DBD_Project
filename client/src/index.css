@@ -15,12 +15,13 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg-app); color: var(--text); font-family: 'Inter', sans-serif; }
+html, body, #root { width: 100%; min-height: 100vh; margin: 0; padding: 0; }
+body { background: var(--bg-app); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
 /* Layout Grid & Side Navigation spacing */
-.app-container { display: flex; min-height: 100vh; }
-.main-content { flex: 1; padding: 2rem; margin-left: 280px; }
-@media (max-width: 992px) { .main-content { margin-left: 80px; padding: 1rem; } }
+.app-container { display: flex; min-height: 100vh; width: 100%; }
+.main-content { flex: 1; padding: 2rem; margin-left: 280px; min-width: 0; width: calc(100% - 280px); box-sizing: border-box; }
+@media (max-width: 992px) { .main-content { margin-left: 80px; width: calc(100% - 80px); padding: 1rem; } }
 
 /* Shared Container Cards */
 .glass-card {

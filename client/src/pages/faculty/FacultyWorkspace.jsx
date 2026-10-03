@@ -798,7 +798,7 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
   // -------------------------------------------------------------
 
   return (
-    <div style={styles.container}>
+    <div className="main-content" style={styles.container}>
       {/* Toast Notification */}
       {toast.show && (
         <div style={{
@@ -3045,9 +3045,13 @@ const FacultyWorkspace = ({ tab = 'dashboard' }) => {
 // =========================================================================
 const styles = {
   container: {
+    flex: 1,
+    width: 'calc(100% - 280px)',
+    minWidth: 0,
     marginLeft: '280px',
     padding: '2rem 2.5rem',
     minHeight: '100vh',
+    boxSizing: 'border-box',
     backgroundColor: '#0d1117',
     color: '#f3f4f6',
     fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
